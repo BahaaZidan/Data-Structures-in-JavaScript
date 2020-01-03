@@ -1,0 +1,19 @@
+{
+  "name": "Data-Structures-in-JavaScript",
+  "version": "0.0.1",
+  "description": "Trying to learn the basics",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --exec babel-node index.js"
+  },
+  "repository": "git@github.com:bahaa-al-deen/Data-Structures-in-JavaScript.git",
+  "author": "bahaa-al-deen <bzidan2021@gmail.com>",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.7.7",
+    "@babel/node": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
+    "nodemon": "^2.0.2"
+  }
+}
