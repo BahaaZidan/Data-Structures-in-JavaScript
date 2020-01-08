@@ -2,7 +2,7 @@ import { Node } from './BinaryTree';
 import { BinarySearchTree } from './BinarySearchTree';
 
 export class AVLNode extends Node {
-  constructor(value, parent, right, left, height) {
+  constructor(value, parent, right, left, height = 0) {
     super(value, parent, right, left);
     this.height = height;
   }
@@ -11,52 +11,79 @@ export class AVLNode extends Node {
 export class AVLTree extends BinarySearchTree {
 	constructor(root) {
 		super(root);
-  }
+	}
+	
+	calcHeight(node) {
+		return !node ? 0 : 1 + Math.max(node?.left ? node.left.height : -1, node?.right ? node.right.height : -1);
+	}
+
+	calcBalance(node) {
+		if((!node.left) && (!node.right)) { 
+			return 0;
+		}else if (!node.left) {
+			return -1 * (node.right.height + 1);
+		} else if (!node.right) {
+			return node.left.height + 1;
+		} else {
+			return node.left.height - node.right.height;
+		}
+	}
   
-  ninja(node, dir = 'right') {
+  rotate(node, dir = 'right') {
     let opposite = dir === 'right' ? 'left' : 'right';
     let newRoot = node[opposite];
     node[opposite] = node[opposite][dir];
     newRoot[dir] = node;
-    node.height = node.height - 1;
-    // newRoot.height = this.calcHeight(newRoot);
-  }
-  // grandchild of disbalanced node have maximum height
-  rotate(node) {
-    // level order traversal
-    // when you detect height delta > 1
-    // decide what rotation strategy will be used ll, lr, rl, rr
-    // execute it
-    // terminate
-  }
+		node.height = this.calcHeight(node);
+		newRoot.height = this.calcHeight(newRoot);
+		return newRoot;
+	}
 
-	insert(node) {
-		if (this.root === null) {
-			this.root = node;
+	insert(value) {
+		this.root = this.avlInsert(value, this.root);
+	}
+
+	avlInsert(value, root) {
+		let node = new AVLNode(value);
+		// normal BST insert
+		if (!root) {
+			return node;
+		} else if (node.value <= root.value) {
+			root.left = this.avlInsert(value, root.left);
 		} else {
-			let root = this.root;
-			while (root) {
-				if (node.value > root.value) {
-					if (!root.right) {
-						root.right = node;
-						node.parent = root;
-						break;
-					} else {
-						root = root.right;
-						continue;
-					}
-				} else {
-					if (!root.left) {
-						root.left = node;
-						node.parent = root;
-						break;
-					} else {
-						root = root.left;
-						continue;
-					}
-				}
+			root.right = this.avlInsert(value, root.right);
+		}
+
+		// adjust the height of the current node
+		root.height = this.calcHeight(root);
+
+		// do rotations
+		let balance = this.calcBalance(root);
+		// console.log('balance', balance)
+		if (balance > 1) {
+			// LEFT LEFT -> right rotation
+			if (this.calcBalance(root.left) > 0) {
+				console.log('LEFT LEFT');
+				return this.rotate(root, 'right');
+			} else { // LEFT RIGHT -> right + left rotation
+				console.log('LEFT RIGHT');
+				root.left = this.rotate(root.left, 'left');
+				return this.rotate(root, 'right');
+			}
+		} else if (balance < -1) {
+			// RIGHT RIGHT -> left rotation
+			console.log(this.calcBalance(root.right));
+			if (this.calcBalance(root.right) < 0) {
+				console.log('RIGHT RIGHT');
+				return this.rotate(root, 'left');
+			} else { // RIGHT LEFT -> left + right rotation
+				console.log('RIGHT LEFT');
+				root.right = this.rotate(root.right, 'right');
+				return this.rotate(root, 'left');
 			}
 		}
+
+		return root;
   }
   
   findMinSuccessor(root) {
