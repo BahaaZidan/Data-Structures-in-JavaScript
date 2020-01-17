@@ -13,11 +13,11 @@ export class AVLTree extends BinarySearchTree {
 		super(root);
 	}
 	
-	calcHeight(node) {
+	_calcHeight(node) {
 		return !node ? 0 : 1 + Math.max(node?.left ? node.left.height : -1, node?.right ? node.right.height : -1);
 	}
 
-	calcBalance(node) {
+	_calcBalance(node) {
 		if((!node.left) && (!node.right)) { 
 			return 0;
 		}else if (!node.left) {
@@ -29,87 +29,110 @@ export class AVLTree extends BinarySearchTree {
 		}
 	}
   
-  rotate(node, dir = 'right') {
+  _rotate(node, dir = 'right') {
     let opposite = dir === 'right' ? 'left' : 'right';
     let newRoot = node[opposite];
     node[opposite] = node[opposite][dir];
     newRoot[dir] = node;
-		node.height = this.calcHeight(node);
-		newRoot.height = this.calcHeight(newRoot);
+		node.height = this._calcHeight(node);
+		newRoot.height = this._calcHeight(newRoot);
 		return newRoot;
 	}
 
 	insert(value) {
-		this.root = this.avlInsert(value, this.root);
+		this.root = this._avlInsert(value, this.root);
 	}
 
-	avlInsert(value, root) {
+	_avlInsert(value, root) {
 		let node = new AVLNode(value);
 		// normal BST insert
 		if (!root) {
 			return node;
 		} else if (node.value <= root.value) {
-			root.left = this.avlInsert(value, root.left);
+			root.left = this._avlInsert(value, root.left);
 		} else {
-			root.right = this.avlInsert(value, root.right);
+			root.right = this._avlInsert(value, root.right);
 		}
 
 		// adjust the height of the current node
-		root.height = this.calcHeight(root);
+		root.height = this._calcHeight(root);
 
 		// do rotations
-		let balance = this.calcBalance(root);
-		// console.log('balance', balance)
+		let balance = this._calcBalance(root);
 		if (balance > 1) {
 			// LEFT LEFT -> right rotation
-			if (this.calcBalance(root.left) > 0) {
-				console.log('LEFT LEFT');
-				return this.rotate(root, 'right');
+			if (this._calcBalance(root.left) > 0) {
+				return this._rotate(root, 'right');
 			} else { // LEFT RIGHT -> right + left rotation
-				console.log('LEFT RIGHT');
-				root.left = this.rotate(root.left, 'left');
-				return this.rotate(root, 'right');
+				root.left = this._rotate(root.left, 'left');
+				return this._rotate(root, 'right');
 			}
 		} else if (balance < -1) {
 			// RIGHT RIGHT -> left rotation
-			console.log(this.calcBalance(root.right));
-			if (this.calcBalance(root.right) < 0) {
-				console.log('RIGHT RIGHT');
-				return this.rotate(root, 'left');
+			if (this._calcBalance(root.right) < 0) {
+				return this._rotate(root, 'left');
 			} else { // RIGHT LEFT -> left + right rotation
-				console.log('RIGHT LEFT');
-				root.right = this.rotate(root.right, 'right');
-				return this.rotate(root, 'left');
+				root.right = this._rotate(root.right, 'right');
+				return this._rotate(root, 'left');
 			}
 		}
 
 		return root;
   }
   
-  findMinSuccessor(root) {
+  _findMinSuccessor(root) {
 		if (!root.left) {
 			return root;
 		}
-		return this.findMinSuccessor(root.left);
+		return this._findMinSuccessor(root.left);
 	}
 
-	delete(value, root = this.root) {
-		if (!root) return;
-		if (value < root.value) {
-			this.delete(value, root.left);
+	delete(value) {
+		this.root = this._avlDelete(value, this.root);
+	}
+
+	_avlDelete(value, root, parent, dir) {
+		if (!root) {
+			// value wasn't found. do nothing
+		} else if (value < root.value) {
+			root.left = this._avlDelete(value, root.left, root, 'left');
 		} else if (value > root.value) {
-			this.delete(value, root.right);
-		} else {
+			root.right = this._avlDelete(value, root.right, root, 'right');
+		} else { // value is found
 			if (root.left && root.right) {
-				const minSuccesor = this.findMinSuccessor(root.right);
-				root.value = minSuccesor.value;
-				this.delete(minSuccesor.value, root.right);
+				let minSuccessor = this._findMinSuccessor(root.right);
+				root.value = minSuccessor.value;
+				root.right = this._avlDelete(minSuccessor.value, root.right);
 			} else if (root.left || root.right) {
-				const child = root.left || root.right;
-				root.parent.left === root ? root.parent.left = child : root.parent.right = child;
+				parent[dir] = root.left || root.right;
 			} else {
-				root.parent.left === root ? root.parent.left = null : root.parent.right = null;
+				parent[dir] = null;
 			}
 		}
+
+		// adjust the height of the current node
+		root.height = this._calcHeight(root);
+
+		// do rotations
+		let balance = this._calcBalance(root);
+		if (balance > 1) {
+			// LEFT LEFT -> right rotation
+			if (this._calcBalance(root.left) > 0) {
+				return this._rotate(root, 'right');
+			} else { // LEFT RIGHT -> right + left rotation
+				root.left = this._rotate(root.left, 'left');
+				return this._rotate(root, 'right');
+			}
+		} else if (balance < -1) {
+			// RIGHT RIGHT -> left rotation
+			if (this._calcBalance(root.right) < 0) {
+				return this._rotate(root, 'left');
+			} else { // RIGHT LEFT -> left + right rotation
+				root.right = this._rotate(root.right, 'right');
+				return this._rotate(root, 'left');
+			}
+		}
+
+		return root;
 	}
 }
