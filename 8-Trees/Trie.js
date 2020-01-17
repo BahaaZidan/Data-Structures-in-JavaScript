@@ -8,6 +8,6 @@ class TrieNode {
 
 export class Trie {
   constructor() {
-
+    this.root = null;
   }
 }
