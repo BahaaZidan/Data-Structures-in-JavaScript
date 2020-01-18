@@ -6,6 +6,6 @@ let unsorted = [30, 10, 50, 20, 60, 40];
 
 console.log(unsorted);
 
-insertionSort(unsorted);
+console.log(insertionSort(unsorted));
 
 console.log(unsorted);
