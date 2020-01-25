@@ -14,7 +14,7 @@ export class BinaryHeap_Array {
   }
 
   // inner method that corrects the array to maintain the heap property
-  _heapifyBottomToTop() {
+  #heapifyBottomToTop() {
     let idx = this.heap.length - 1;
     let getParentIdx = i => i % 2 === 0 ? i / 2 : (i - 1) / 2;
     // if child is less than parent
@@ -29,7 +29,7 @@ export class BinaryHeap_Array {
   }
 
   // inner method that corrects the array to maintain the heap property
-  _heapifyTopToBottom() {
+  #heapifyTopToBottom() {
     let idx = 1;
     let getLeftChildIdx = i => i*2;
     let getRightChildIdx = i => i*2 + 1;
@@ -54,14 +54,14 @@ export class BinaryHeap_Array {
 
   insert(value) {
     this.heap.push(value);
-    this._heapifyBottomToTop();
+    this.#heapifyBottomToTop();
   }
 
   extractMin() {
     let minVal = this.heap[1];
     this.heap[1] = this.heap[this.heap.length - 1];
     this.heap.pop();
-    this._heapifyTopToBottom();
+    this.#heapifyTopToBottom();
     return minVal;
   }
 
