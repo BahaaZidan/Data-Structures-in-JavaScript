@@ -6,7 +6,7 @@ const bucketSort = array => {
   let getAppropriateBucket = value => Math.ceil((value * numberOfBuckets) / max); // 1
 
   let buckets = [];
-  for(let i = 0; i < numberOfBuckets; i++) buckets.push([]); // < n
+  for(let i = 0; i < numberOfBuckets; i++) buckets.push([]); // m(number of buckets)
   array.forEach(value => { // n
     buckets[getAppropriateBucket(value) - 1].push(value);
   });
